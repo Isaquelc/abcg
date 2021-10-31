@@ -42,11 +42,9 @@ void Enemies::paintGL() {
 
     abcg::glUniform4fv(m_colorLoc, 1, &enemy.m_color.r);
 
-    //for (auto i : {-2, 0, 2}) {
     abcg::glUniform2f(m_translationLoc, enemy.m_translation.x, enemy.m_translation.y);
 
     abcg::glDrawElements(GL_TRIANGLES, 3 * 6, GL_UNSIGNED_INT, nullptr);
-    //}
     abcg::glBindVertexArray(0);
   }
   abcg::glUseProgram(0);
