@@ -1,5 +1,5 @@
 # Projeto 1
-======
+
 Disponível [aqui](https://isaquelc.github.io/abcg/projeto_1/)
 
 Este é o primeiro projeto da matéria Computação Gráfica da UFABC. Neste projeto, precisávamos desenvolver uma aplicação 2D interativa, e eu fiz um jogo 2D inspirado em jogos antigos de Atari. 
