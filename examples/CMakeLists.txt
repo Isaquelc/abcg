@@ -1,2 +1,6 @@
-add_subdirectory(helloworld)
-
+#add_subdirectory(helloworld)
+#add_subdirectory(firstapp)
+#add_subdirectory(sierpinski)
+#add_subdirectory(regularpolygons)
+add_subdirectory(projeto_1)
+#add_subdirectory(asteroids1)
