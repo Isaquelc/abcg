@@ -29,10 +29,5 @@ public/*.data
 public/*.js
 public/*.wasm
 
-# built in examples
-examples/asteroids
-examples/asteroids1
-examples/firstapp
-examples/helloworld
-examples/regularpolygons
-examples/sierpinski
+# examples
+examples/
