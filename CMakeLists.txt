@@ -5,5 +5,6 @@ project(abcg)
 include(cmake/Common.cmake)
 
 add_subdirectory(abcg)
-add_subdirectory(examples)
-#add_subdirectory(projeto_1)
+# add_subdirectory(examples)
+# add_subdirectory(projeto_1)
+add_subdirectory(3DRacer)
