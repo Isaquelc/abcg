@@ -1,43 +1,39 @@
 #ifndef OPENGLWINDOW_HPP_
 #define OPENGLWINDOW_HPP_
 
-#include <random>
+#include <vector>
 
 #include "abcg.hpp"
-#include "enemies.hpp"
 #include "player.hpp"
+#include "gamedata.hpp"
+#include "camera.hpp"
 
 class OpenGLWindow : public abcg::OpenGLWindow {
-  protected:
-    void initializeGL() override;
-    void paintGL() override;
-    void paintUI() override;
-    void resizeGL(int width, int height) override;
-    void terminateGL() override;
+    protected:
+        void handleEvent(SDL_Event& ev) override;
+        void initializeGL() override;
+        void paintGL() override;
+        void paintUI() override;
+        void resizeGL(int width, int height) override;
+        void terminateGL() override;
 
-  private:
-    static const int m_numCars{5};
+    private:
+        GLuint m_VAO{};
+        GLuint m_VBO{};
+        GLuint m_EBO{};
+        GLuint m_program{};
 
-    GLuint m_program{};
+        GameData m_gameData;
+        Player m_player;
+        Camera m_camera;
 
-    int m_viewportWidth{};
-    int m_viewportHeight{};
+        int m_viewportWidth{};
+        int m_viewportHeight{};
 
-    std::default_random_engine m_randomEngine;
+        std::vector<Vertex> m_vertices;
+        std::vector<GLuint> m_indices;
 
-    Enemy m_enemies;
-    Player m_player;
-
-    std::array<glm::vec3, m_numCars> m_carPositions;
-    glm::vec3 m_playerPosition;
-    float m_angle{};
-
-    glm::mat4 m_viewMatrix{1.0f};
-    glm::mat4 m_projMatrix{1.0f};
-    float m_FOV{50.0f};
-
-    void randomizeCar(glm::vec3 &position);
-    void update();
+        void update();
 };
 
 #endif
