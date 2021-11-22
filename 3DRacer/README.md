@@ -3,6 +3,8 @@
 Disponível [aqui](https://isaquelc.github.io/abcg/3DRacer/)
 Caso o WebAssembly não esteja funcionaddo, o vídeo do projeto está [aqui](https://drive.google.com/file/d/19ij_IkFtALSpDX7OoxUU54B7N4pa753F/view?usp=sharing)
 
+_OBS: o jogo demora para carregar, acho que é devido ao modelo 3D que não foi otimizado e contém muitas vértices e objetos separados, o que não é ideal, e portanto o aplicativo não roda bem no WebAssembly por enquanto._
+
 Este é o segundo projeto da matéria Computação Gráfica da UFABC. Neste projeto, precisávamos desenvolver uma aplicação 3D, e eu fiz uma versão 3D levemente modificada do meu projeto 1, chamada 3D Racer.  
 
 Neste jogo o jogador controla um carro (mais especificamente um DeLorean), e precisa desviar de outros carros que vem na direção oposta. A pontuação é proporcional ao tempo que o jogador sobrevive sem colidir, porém o jogo não fica mais rápido com o passar do tempo. 
