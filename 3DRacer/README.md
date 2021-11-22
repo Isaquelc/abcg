@@ -1,6 +1,7 @@
 # Projeto 2 - 3D Racer
 
 Disponível [aqui](https://isaquelc.github.io/abcg/3DRacer/)
+Caso o WebAssembly não esteja funcionaddo, o vídeo do projeto está [aqui](https://drive.google.com/file/d/19ij_IkFtALSpDX7OoxUU54B7N4pa753F/view?usp=sharing)
 
 Este é o segundo projeto da matéria Computação Gráfica da UFABC. Neste projeto, precisávamos desenvolver uma aplicação 3D, e eu fiz uma versão 3D levemente modificada do meu projeto 1, chamada 3D Racer.  
 
