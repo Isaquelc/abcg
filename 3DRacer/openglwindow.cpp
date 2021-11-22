@@ -37,6 +37,14 @@ if (ev.type == SDL_KEYUP) {
 }
 
 void OpenGLWindow::initializeGL() {
+    // Load a new font
+    ImGuiIO &io{ImGui::GetIO()};
+    auto filename{getAssetsPath() + "Inconsolata-Medium.ttf"};
+    m_font = io.Fonts->AddFontFromFileTTF(filename.c_str(), 60.0f);
+    if (m_font == nullptr) {
+        throw abcg::Exception{abcg::Exception::Runtime("Cannot load font file")};
+    }
+
     abcg::glClearColor(0, 0, 0, 1);
 
     // Enable depth buffering
@@ -46,15 +54,13 @@ void OpenGLWindow::initializeGL() {
     m_program = createProgramFromFile(getAssetsPath() + "depth.vert",
                                         getAssetsPath() + "depth.frag");
 
-    // initialize the ground
-    m_ground.initializeGL(m_program);
-
     // Load model
     m_player.loadObj(getAssetsPath() + "DeLorean_DMC-12_V2.obj");
     m_enemies.loadObj(getAssetsPath() + "DeLorean_DMC-12_V2.obj");
-    
+
     m_player.initializeGL(m_program);
     m_enemies.initializeGL(m_program);
+    m_ground.initializeGL(m_program);
 
     resizeGL(getWindowSettings().width, getWindowSettings().height);
 }
@@ -85,8 +91,38 @@ void OpenGLWindow::paintGL() {
 }
 
 void OpenGLWindow::paintUI() {
-    // ImGui::PopFont();
-    // ImGui::End();
+    abcg::OpenGLWindow::paintUI();
+
+    {
+        if (m_gameData.m_state == State::GameOver) {
+            auto size{ImVec2(400, 400)};
+            auto position{ImVec2((m_viewportWidth - size.x) / 2.0f, (m_viewportHeight - size.y) / 2.0f)};
+            ImGui::SetNextWindowPos(position);
+            ImGui::SetNextWindowSize(size);
+            ImGuiWindowFlags flags{ImGuiWindowFlags_NoBackground |
+                                ImGuiWindowFlags_NoTitleBar |
+                                ImGuiWindowFlags_NoInputs};
+            ImGui::Begin(" ", nullptr, flags);
+            ImGui::PushFont(m_font);
+            ImGui::Text("Game Over\nYour Score:\n%.2f Km", m_gameData.gameScore);
+    }
+
+    if (m_gameData.m_state == State::Playing) {
+        auto size{ImVec2(600, 600)};
+        auto position{ImVec2((m_viewportWidth - size.x) / 2.0f, (m_viewportHeight - size.y) / 2.0f)};
+        ImGui::SetNextWindowPos(position);
+        ImGui::SetNextWindowSize(size);
+        ImGuiWindowFlags flags{ImGuiWindowFlags_NoBackground |
+                            ImGuiWindowFlags_NoTitleBar |
+                            ImGuiWindowFlags_NoInputs};
+        ImGui::Begin(" ", nullptr, flags);
+        ImGui::PushFont(m_font);
+        ImGui::Text("Score:%.2f Km", m_gameData.gameScore);
+    }
+
+    ImGui::PopFont();
+    ImGui::End();
+    }
 }
 
 void OpenGLWindow::resizeGL(int width, int height) {
@@ -107,10 +143,47 @@ void OpenGLWindow::terminateGL() {
     abcg::glDeleteVertexArrays(1, &m_VAO);
 }
 
+void OpenGLWindow::restart() {
+    m_gameData.m_state = State::Playing;
+    // reset score
+    m_gameData.gameScore = 0;
+
+    m_ground.initializeGL(m_program);
+    m_player.initializeGL(m_program);
+    m_enemies.initializeGL(m_program);
+}
+
 void OpenGLWindow::update() {
     const float deltaTime{static_cast<float>(getDeltaTime())};
-    m_ground.update(deltaTime);
-    m_player.update(m_gameData, deltaTime);
-    m_enemies.update(deltaTime);
+
+    // increase score
+    if (m_gameData.m_state == State::Playing) { 
+        m_gameData.gameScore += 0.1 * deltaTime; 
+        m_player.update(m_gameData, deltaTime);
+        m_enemies.update(deltaTime);
+        m_ground.update(deltaTime);
+        checkCollisions();
+    }
+    
+    // Wait 5 seconds before restarting
+    if (m_gameData.m_state != State::Playing && m_restartWaitTimer.elapsed() > 3) {
+        restart();
+        return;
+    }
+
     m_camera.computeViewMatrix();
+}
+
+void OpenGLWindow::checkCollisions() {
+    // Check collision between Player and enemies
+    for (const auto index : iter::range(m_enemies.m_numCars)) {
+        auto &position{m_enemies.m_enemiesPositions.at(index)};
+        const auto distance_x{std::abs(glm::distance(m_player.m_translation.x, position.x))};
+        const auto distance_z{std::abs(glm::distance(m_player.m_translation.z, position.z))};
+
+        if (distance_x < 0.7 && distance_z < 2.25) {
+            m_gameData.m_state = State::GameOver;
+            m_restartWaitTimer.restart();
+        }
+    }
 }

@@ -1,6 +1,8 @@
 #ifndef OPENGLWINDOW_HPP_
 #define OPENGLWINDOW_HPP_
 
+#include <imgui.h>
+
 #include <vector>
 
 #include "abcg.hpp"
@@ -18,6 +20,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
         void paintUI() override;
         void resizeGL(int width, int height) override;
         void terminateGL() override;
+        void checkCollisions();
 
     private:
         GLuint m_VAO{};
@@ -31,6 +34,9 @@ class OpenGLWindow : public abcg::OpenGLWindow {
         Ground m_ground;
         Enemy m_enemies;
 
+        abcg::ElapsedTimer m_restartWaitTimer;
+        ImFont* m_font{};
+
         int m_viewportWidth{};
         int m_viewportHeight{};
 
@@ -38,6 +44,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
         std::vector<GLuint> m_indices;
 
         void update();
+        void restart();
 };
 
 #endif

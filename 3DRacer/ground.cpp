@@ -4,10 +4,10 @@
 
 void Ground::initializeGL(GLuint program) {
     // Unit quad on the xz plane
-    std::array<glm::vec3, 4> vertices{  glm::vec3(-0.5f, -0.25f,  0.5f), 
-                                        glm::vec3(-0.5f, -0.25f, -0.5f),
-                                        glm::vec3( 0.5f, -0.25f,  0.5f),
-                                        glm::vec3( 0.5f, -0.25f, -0.5f)};
+    std::array<glm::vec3, 4> vertices{  glm::vec3(-0.5f, -0.2f,  0.5f), 
+                                        glm::vec3(-0.5f, -0.2f, -0.5f),
+                                        glm::vec3( 0.5f, -0.2f,  0.5f),
+                                        glm::vec3( 0.5f, -0.2f, -0.5f)};
 
     // Generate VBO
     abcg::glGenBuffers(1, &m_VBO);
@@ -76,7 +76,7 @@ void Ground::update(float deltaTime) {
         position.z += 10 * deltaTime;
 
         if (position.z > 0.5f) {
-            position.z = -20.5f;
+            position.z = -25.5f;
         }
     }
 }

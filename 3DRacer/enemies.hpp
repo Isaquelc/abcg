@@ -39,9 +39,10 @@ class Enemy {
         std::vector<GLuint> m_indices;
 
         std::array<glm::vec3, m_numCars> m_enemiesPositions;
+        std::array<glm::vec4, m_numCars> m_enemiesColors;
 
         void standardize();
-        void randomizeCar(glm::vec3 &position);
+        void randomizeCar(glm::vec3 &position, glm::vec4 &color);
 };
 
 #endif

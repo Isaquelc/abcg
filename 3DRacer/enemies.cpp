@@ -78,14 +78,21 @@ void Enemy::loadObj(std::string_view path, bool standardize) {
     // createBuffers();
 }
 
-void Enemy::randomizeCar(glm::vec3 &position) {
-    // Get ranfom postion
+void Enemy::randomizeCar(glm::vec3 &position, glm::vec4 &color) {
+    // Get random postion
     // x coordnates in the range [-2, 2]
     // z coordinates in the range [-50, -100]
     std::uniform_real_distribution<float> distPosXY(-2.0f, 2.0f);
     std::uniform_real_distribution<float> distPosZ(-100.0f, -200.0f);
 
     position = glm::vec3(distPosXY(m_randomEngine), 0, distPosZ(m_randomEngine));
+
+    // Get random colors
+    std::uniform_real_distribution<float> colorX(0.0f, 1.0f);
+    std::uniform_real_distribution<float> colorY(0.0f, 1.0f);
+    std::uniform_real_distribution<float> colorZ(0.0f, 1.0f);
+
+    color = glm::vec4(colorX(m_randomEngine), colorY(m_randomEngine), colorZ(m_randomEngine), 1.0f);
 }
 
 void Enemy::standardize() {
@@ -143,8 +150,9 @@ void Enemy::initializeGL(GLuint program) {
 
     for (const auto index : iter::range(m_numCars)) {
         auto &position{m_enemiesPositions.at(index)};
+        auto &color{m_enemiesColors.at(index)};
         // position = glm::vec3(0.0f, 0.0f, -10.0f);
-        randomizeCar(position);
+        randomizeCar(position, color);
     }
 
     // End of binding to current VAO
@@ -161,6 +169,7 @@ void Enemy::paintGL() {
 
     for (const auto index : iter::range(m_numCars)) {
         auto &position{m_enemiesPositions.at(index)};
+        auto &color{m_enemiesColors.at(index)};
 
         // compute model matrix of the current car
         glm::mat4 enemylMatrix{1.0f};
@@ -169,7 +178,8 @@ void Enemy::paintGL() {
         enemylMatrix = glm::scale(enemylMatrix, glm::vec3(1.0f)); 
 
         abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &enemylMatrix[0][0]);
-        abcg::glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
+
+        abcg::glUniform4f(colorLoc, color.x, color.y, color.z, 1.0f);
         abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
     }
 
@@ -180,13 +190,14 @@ void Enemy::paintGL() {
 void Enemy::update(float deltaTime) {
     for (const auto index : iter::range(m_numCars)) {
         auto &position{m_enemiesPositions.at(index)};
+        auto &color{m_enemiesColors.at(index)};
 
         // Move enemy towards camera
         position.z += deltaTime * 50.0f;
 
         // If this car is behind the camera, move it back with a new random x position and a slightly random z position
         if (position.z > 0.1f) {
-            randomizeCar(position);
+            randomizeCar(position, color);
         }
     }
 }
