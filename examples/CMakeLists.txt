@@ -5,5 +5,5 @@
 # add_subdirectory(projeto_1)
 # add_subdirectory(asteroids1)
 # add_subdirectory(loadmodel)
-# add_subdirectory(lookat)
-add_subdirectory(starfield)
+add_subdirectory(lookat)
+# add_subdirectory(starfield)

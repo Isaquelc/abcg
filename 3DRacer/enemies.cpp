@@ -1,4 +1,4 @@
-#include "player.hpp"
+#include "enemies.hpp"
 
 #include <fmt/core.h>
 #include <tiny_obj_loader.h>
@@ -18,7 +18,7 @@ struct hash<Vertex> {
     };
 }  // namespace std
 
-void Player::loadObj(std::string_view path, bool standardize) {
+void Enemy::loadObj(std::string_view path, bool standardize) {
     tinyobj::ObjReader reader;
 
     if (!reader.ParseFromFile(path.data())) {
@@ -78,7 +78,17 @@ void Player::loadObj(std::string_view path, bool standardize) {
     // createBuffers();
 }
 
-void Player::standardize() {
+void Enemy::randomizeCar(glm::vec3 &position) {
+    // Get ranfom postion
+    // x coordnates in the range [-2, 2]
+    // z coordinates in the range [-50, -100]
+    std::uniform_real_distribution<float> distPosXY(-2.0f, 2.0f);
+    std::uniform_real_distribution<float> distPosZ(-100.0f, -200.0f);
+
+    position = glm::vec3(distPosXY(m_randomEngine), 0, distPosZ(m_randomEngine));
+}
+
+void Enemy::standardize() {
     // Center to origin and normalize largest bound to [-1, 1]
 
     // Get bounds
@@ -101,10 +111,7 @@ void Player::standardize() {
     }
 }
 
-void Player::initializeGL(GLuint program) {
-
-    m_translation = glm::vec3(0.0f, 0.0f, -5.0f);
-    m_angle = 180.0f;
+void Enemy::initializeGL(GLuint program) {
 
     m_program = program;
 
@@ -134,11 +141,17 @@ void Player::initializeGL(GLuint program) {
 
     abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
+    for (const auto index : iter::range(m_numCars)) {
+        auto &position{m_enemiesPositions.at(index)};
+        // position = glm::vec3(0.0f, 0.0f, -10.0f);
+        randomizeCar(position);
+    }
+
     // End of binding to current VAO
     abcg::glBindVertexArray(0);
 }
 
-void Player::paintGL() {
+void Enemy::paintGL() {
     abcg::glUseProgram(m_program);
     abcg::glBindVertexArray(m_VAO);
 
@@ -146,52 +159,39 @@ void Player::paintGL() {
     const GLint modelMatrixLoc{abcg::glGetUniformLocation(m_program, "modelMatrix")};
     const GLint colorLoc{abcg::glGetUniformLocation(m_program, "color")};
 
-    m_playerPos = glm::mat4{1.0f};
-    m_playerPos = glm::translate(m_playerPos, m_translation); // moves player slightly forward
-    m_playerPos = glm::rotate(m_playerPos, glm::radians(m_angle), glm::vec3(0.0f, 1.0f, 0.0f)); // no initial rotation
-    m_playerPos = glm::scale(m_playerPos, glm::vec3(1.0f)); // no further scaling
+    for (const auto index : iter::range(m_numCars)) {
+        auto &position{m_enemiesPositions.at(index)};
 
-    abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &m_playerPos[0][0]);
-    abcg::glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
-    abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
+        // compute model matrix of the current car
+        glm::mat4 enemylMatrix{1.0f};
+        enemylMatrix = glm::translate(enemylMatrix, position); 
+        enemylMatrix = glm::rotate(enemylMatrix, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        enemylMatrix = glm::scale(enemylMatrix, glm::vec3(1.0f)); 
+
+        abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &enemylMatrix[0][0]);
+        abcg::glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
+        abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
+    }
 
     abcg::glBindVertexArray(0);
     // abcg::glUseProgram(0);
 }
 
-void Player::update(const GameData &gameData, float deltaTime) {
-    // Move
-    if (gameData.m_input[static_cast<size_t>(Input::Left)] && m_translation.x>-2) {
-        m_translation.x -= 5.0 * deltaTime;
-        if (m_angle < 180) {
-            m_angle = 180;
+void Enemy::update(float deltaTime) {
+    for (const auto index : iter::range(m_numCars)) {
+        auto &position{m_enemiesPositions.at(index)};
+
+        // Move enemy towards camera
+        position.z += deltaTime * 50.0f;
+
+        // If this car is behind the camera, move it back with a new random x position and a slightly random z position
+        if (position.z > 0.1f) {
+            randomizeCar(position);
         }
-        else if (m_angle < 200) {
-            m_angle += 200 * deltaTime;
-        }
-        // m_angle = 225;
     }
-    if (gameData.m_input[static_cast<size_t>(Input::Right)] && m_translation.x<2) {
-        m_translation.x += 5.0 * deltaTime;
-        if (m_angle > 180) {
-            m_angle = 180;
-        }
-        else if (m_angle > 160) {
-            m_angle -= 200 * deltaTime;
-        }
-        // m_angle = 135;
-    }
-    if (! gameData.m_input[static_cast<size_t>(Input::Left)] && 
-        ! gameData.m_input[static_cast<size_t>(Input::Right)] &&
-        m_angle > 180)
-        m_angle -= 200 * deltaTime;
-    if (! gameData.m_input[static_cast<size_t>(Input::Left)] && 
-        ! gameData.m_input[static_cast<size_t>(Input::Right)] &&
-        m_angle < 180)
-        m_angle += 200 * deltaTime;
 }
 
-void Player::terminateGL() {
+void Enemy::terminateGL() {
     abcg::glDeleteBuffers(1, &m_VBO);
     abcg::glDeleteVertexArrays(1, &m_VAO);
 }

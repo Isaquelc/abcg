@@ -7,6 +7,8 @@
 #include "player.hpp"
 #include "gamedata.hpp"
 #include "camera.hpp"
+#include "ground.hpp"
+#include "enemies.hpp"
 
 class OpenGLWindow : public abcg::OpenGLWindow {
     protected:
@@ -26,6 +28,8 @@ class OpenGLWindow : public abcg::OpenGLWindow {
         GameData m_gameData;
         Player m_player;
         Camera m_camera;
+        Ground m_ground;
+        Enemy m_enemies;
 
         int m_viewportWidth{};
         int m_viewportHeight{};

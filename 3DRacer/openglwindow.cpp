@@ -46,9 +46,15 @@ void OpenGLWindow::initializeGL() {
     m_program = createProgramFromFile(getAssetsPath() + "depth.vert",
                                         getAssetsPath() + "depth.frag");
 
+    // initialize the ground
+    m_ground.initializeGL(m_program);
+
     // Load model
     m_player.loadObj(getAssetsPath() + "DeLorean_DMC-12_V2.obj");
+    m_enemies.loadObj(getAssetsPath() + "DeLorean_DMC-12_V2.obj");
+    
     m_player.initializeGL(m_program);
+    m_enemies.initializeGL(m_program);
 
     resizeGL(getWindowSettings().width, getWindowSettings().height);
 }
@@ -69,12 +75,13 @@ void OpenGLWindow::paintGL() {
 
     // Set uniform variables for viewMatrix and projMatrix
     // These matrices are used for every scene object
-    abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE,
-                            &m_camera.m_viewMatrix[0][0]);
-    abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE,
-                            &m_camera.m_projMatrix[0][0]);
+    abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &m_camera.m_viewMatrix[0][0]);
+    abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &m_camera.m_projMatrix[0][0]);
 
+    m_ground.paintGL();
     m_player.paintGL();
+    m_enemies.paintGL();
+    abcg::glUseProgram(0);
 }
 
 void OpenGLWindow::paintUI() {
@@ -90,6 +97,10 @@ void OpenGLWindow::resizeGL(int width, int height) {
 }
 
 void OpenGLWindow::terminateGL() {
+    m_ground.terminateGL();
+    m_player.terminateGL();
+    m_enemies.terminateGL();
+
     abcg::glDeleteProgram(m_program);
     abcg::glDeleteBuffers(1, &m_EBO);
     abcg::glDeleteBuffers(1, &m_VBO);
@@ -98,7 +109,8 @@ void OpenGLWindow::terminateGL() {
 
 void OpenGLWindow::update() {
     const float deltaTime{static_cast<float>(getDeltaTime())};
-
+    m_ground.update(deltaTime);
     m_player.update(m_gameData, deltaTime);
+    m_enemies.update(deltaTime);
     m_camera.computeViewMatrix();
 }
