@@ -4,6 +4,6 @@
 # add_subdirectory(regularpolygons)
 # add_subdirectory(projeto_1)
 # add_subdirectory(asteroids1)
-# add_subdirectory(loadmodel)
-add_subdirectory(lookat)
+# add_subdirectory(lookat)
+add_subdirectory(viewer4)
 # add_subdirectory(starfield)
