@@ -1,56 +1,24 @@
 # Projeto 3 - 3D Racer2
 
 Disponível [aqui](https://isaquelc.github.io/abcg/3DRacer2/)
-Caso o WebAssembly não esteja funcionaddo, o vídeo do projeto está [aqui](https://drive.google.com/file/d/19ij_IkFtALSpDX7OoxUU54B7N4pa753F/view?usp=sharing)
 
-_OBS: o jogo demora para carregar, acho que é devido ao modelo 3D que não foi otimizado e contém muitas vértices e objetos separados, o que não é ideal, e portanto o aplicativo não roda bem no WebAssembly por enquanto._
+_OBS: Existem ainda alguns bugs, como spawnar fora da tela ao segurar umas das teclas para a direita ou esquerda enquanto o jogo reinicia._
 
-Este é o segundo projeto da matéria Computação Gráfica da UFABC. Neste projeto, precisávamos desenvolver uma aplicação 3D, e eu fiz uma versão 3D levemente modificada do meu projeto 1, chamada 3D Racer.  
+Este terçeiro projeto é uma extensão do segundo projeto, e segue a mesma organização principal, as únicas mudanças são em relação à renderização dos objetos: esta versão agora implementa luz e texturas. Quatro elementos são afetados pelas mudanças implementadas:
 
-Neste jogo o jogador controla um carro (mais especificamente um DeLorean), e precisa desviar de outros carros que vem na direção oposta. A pontuação é proporcional ao tempo que o jogador sobrevive sem colidir, porém o jogo não fica mais rápido com o passar do tempo. 
+## OpenGLWindow
+A classe OpenGLWindow agora é responsável pela luz. Nós definimos os parâmetros da luz no arquivo **openglwindow.hpp**, e passamos eles para os arquivos de textura em **PaintGL**. 
 
-A estrutura do projeto é similar à estrutura do projeto 1, com as seguintes classes
+## Player
+O jogador sofreu algumas mudanças. Primeiramente, o arquivo .obj do carro foi modificado para ser mais simples, isto é, ter menos vértices. Isso ajuda na performance do modelo. O jogador tbm agora não é mais renderizado como uma cor sólida. Ele contém uma textura (que foi pintada no Blender) que é atribuída ao modelo por um UV unrwapping. Os detalhes do material do modelo estão no arquivo .mtl
 
-### OpenGLWindow
-Responsável por gerenciar a aplicação e a janela OpenGL. Também contém a função responsável por checar colisões. As funções das outras classes são chamadas por essa classe.
+## Ground
+O chão agora não é mais composto por um quadrado definido na classe Ground e repetido diversas vezes. Agora, nós lemos um arquivo .obj, com um arquivo .mtl associado que contém as definições do material. Tbm usamos uma textura, baixada do site Textures.com. Para obtermos o tamanho correto, nós precisamos dividir o tamanho do objeto por 2.
 
-### Player
-Responsável pelo jogador, contém as funções de carregar o modelo 3D (que eu tinha feito em 2017 num projeto pessoal), uma função de update que move o carro de um lado para o outro (com uma rotação para adicionar realismo). demtre piutras funções e variáveis necessárias. 
+## Enemies
+Os inimigos não usam uma textura específica, pois cada inimigo tem uma cor aleatória atribuída a ele. Para isso, foi adicionado um **mappingMode** a mais além dos que já estavam implementados nos exemplo: mappingMode 4, que é utilizado para usarmos a função de renderização Blinn Phong sem textura alguma.
 
-O jeito que movemos o modelo 3D é modficando uma variável de translação, que é utilizada na matriz de modelo
+## Outras mudanças
+Uma mudança feita no jogo em sí é que agora ele vai ficando progessivamente mais rápido com o passar do tempo, e o fundo também mudou de cor, sendo agora azul. 
 
-### Enemies
-Muito similar à Player, com a diferença que não controlamos os inimigos: eles automaticamente vem em direção ao jogador, e quando estão atrás da camera, sua posição é mudada para um ponto aleatório no eixo z entre -100 e -200 com valores no eixo x entre -2 e 2. A cor do carro também é aleatoria. 
-
-Nós definimos a quantidade de carros numa variável (no caso 5) e assim criamos um array de posições e de cores, que são utilizados para criar as instâncias de inimigos.
-
-A variável de posição, além de ser usada na matriz de modelo, é utilizada para verificar a colisão com o jogador.
-
-### Ground
-Baseado no exemplo "lookat", o ground é composto por um padrão quadriculado, definido na função de inicialização, com as cores e posições armazenadas em arrays. Nós então mudamos a posição no eixo z contínuamente, sempre mandando cada _tile_ para frente da camera quando ele vai para trás da camera. 
-
-Há um problema onde quando o jogo começa, o chão não renderiza corretamente, porém uma vez que vc perde e o jogo reinicia, ele funciona da maneira esperada.
-
-### GameData
-Esta classe é utilizada para definir se o jogo acabou ou não, e a pontuação. Nós tamém definimos o struct Vertex aqui, já que todas as outras classes usam essa.
-
-### Camera
-Responsável pela camera, que no momento é estática e olha na direção do eixo z negativo, um pouco acima da origem.
-
-======
-
-Além destas classes, temos alguns outros arquivos. 
-
-#### Assets
-Contém a fonte utilizada para escrever na tela, e mais dois arquivos:
- - *depth.frag*: simplismente atriui uma cor de entrada como a cor de saída para a renderização dos objetos.
- - *depth.vert*: Atualiza a intensidade dos objetos de acordo com a distância da câmera.
- - *Inconsolata-Medium.ttf*: fonte utilizada para mostrar o texto.
- - *DeLorean_DMC-12_V2.obj*: um arquivo do modelo 3D do DeLorean que eu fiz para um projeto pessoal que é utilizado como modelo dos carros.
-
-#### Arquivos para o Web Assembly
-São os arquivos *index.html*, *projeto_1.js*, *projeto_1.wasm*, responsáveis pela versão do jogo que roda no web browser.
-
-Além desses arquivos, temos o folder *build*, que contém iniformações geradas pelo compilador na hora de gerar o .exe, e o *CMakeLists.txt*, que também é utilizada para compilar o projeto.
-
-Isto tudo é unido pelo arquivo *main.cpp*, que inicia a janela e o jogo.
+Para resolver um bug na luz, é necessário calcular a viewMatrix antes de atribuirmos as variáveis de luz.
